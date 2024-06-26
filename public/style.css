@@ -2,3 +2,19 @@ h1 {
   font-weight: lighter;
   font-style: italic;
 }
+
+body > :nth-child(2) {
+  background-color: beige;
+}
+
+.layout_dark {
+  background-color: black;
+  color: white;
+}
+.layout_dark > header nav a {
+  color: white;
+}
+
+.layout_dark > :nth-child(2) {
+  background-color: darkgrey;
+}

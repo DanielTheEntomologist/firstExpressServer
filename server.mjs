@@ -13,9 +13,9 @@ app.set("view engine", ".hbs");
 app.set("views", "./views");
 // set paths
 const staticPath = path.join(__dirname, "/public");
-const viewsPath = path.join(__dirname, "/views");
-const defaultViewPath = path.join(__dirname, "/views/home.hbs");
-const error404Path = path.join(__dirname, "/views/error404.hbs");
+// const viewsPath = path.join(__dirname, "/views");
+// const defaultViewPath = path.join(__dirname, "/views/home.hbs");
+// const error404Path = path.join(__dirname, "/views/error404.hbs");
 
 app.use(express.static(staticPath));
 
@@ -30,6 +30,7 @@ const viewFiles = {
   "user/panel": "nologin.html",
 };
 const views = {
+  "": "home",
   index: "index",
   about: "about",
   contact: "contact",
@@ -47,14 +48,20 @@ const views = {
 //   next();
 // });
 
-app.get("/", (req, res) => {
-  res.sendFile(defaultViewPath);
-});
+// app.get("/", (req, res) => {
+//   res.sendFile(defaultViewPath);
+// });
 
 for (let key in views) {
-  app.get("/" + String(key), (req, res) => {
-    res.render(views[key], { layout: false });
-  });
+  if (key === "about") {
+    app.get("/" + String(key), (req, res) => {
+      res.render(views[key], { layout: "dark" });
+    });
+  } else {
+    app.get("/" + String(key), (req, res) => {
+      res.render(views[key]);
+    });
+  }
 }
 
 app.get("/hello/:name", (req, res) => {
@@ -63,7 +70,7 @@ app.get("/hello/:name", (req, res) => {
 
 app.use("*", (req, res) => {
   // res.sendFile(error404Path);
-  res.status(404).render("error404", { layout: false });
+  res.status(404).render("error404");
 });
 
 app.listen(8000, () => {
