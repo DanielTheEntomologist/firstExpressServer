@@ -2,6 +2,7 @@
 import express from "express";
 import { engine } from "express-handlebars";
 import path from "path";
+import multer from "multer";
 // const path = require("path");
 
 const __dirname = path.resolve();
@@ -22,16 +23,26 @@ app.use(express.static(staticPath));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-const viewFiles = {
-  index: "index.html",
-  about: "about.html",
-  contact: "contact.html",
-  info: "info.html",
-  history: "history.html",
-  home: "home.html",
-  "user/settings": "nologin.html",
-  "user/panel": "nologin.html",
-};
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./public/uploads/"); // Specify the directory where files should be stored
+  },
+  filename: function (req, file, cb) {
+    // Generate the file name with its original extension
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer(
+  // { dest: "./public/uploads/" }
+  { storage: storage }
+);
+
+// set views
 const views = {
   "": "home",
   index: "index",
@@ -44,17 +55,7 @@ const views = {
   "user/panel": "nologin.hbs",
 };
 
-// app.use((req, res, next) => {
-//   res.showFile = (name) => {
-//     res.sendFile(path.join(viewsPath, name));
-//   };
-//   next();
-// });
-
-// app.get("/", (req, res) => {
-//   res.sendFile(defaultViewPath);
-// });
-
+// set routes
 for (let key in views) {
   if (key === "about") {
     app.get("/" + String(key), (req, res) => {
@@ -71,27 +72,50 @@ app.get("/hello/:name", (req, res) => {
   res.render("hello", { name: String(req.params.name), layout: false });
 });
 
-app.post("/contact/send-message", (req, res) => {
-  const { author, sender, title, message } = req.body;
+// handle contact form
+app.post("/contact/send-message", upload.single("image"), (req, res) => {
+  try {
+    const { author, sender, title, message } = req.body;
 
-  let isSent = false;
-  let isError = !(author && sender && title && message);
+    let file = null;
+    let filename = null;
+    let storedfile = null;
+    if (req.file) {
+      file = req.file;
+      filename = file.originalname;
+      storedfile = file.filename;
+    }
 
-  const params = { author, sender, title, message, isSent, isError };
+    let isSent = false;
+    let isError = !(author && sender && title && message && file);
 
-  if (isError === false) {
-    res.render("contact", {
-      ...params,
-      isSent: true,
-    });
-  } else {
-    res.render("contact", {
-      ...params,
-      isSent: false,
-      isError: true,
-    });
+    const params = {
+      author,
+      sender,
+      title,
+      message,
+      isSent,
+      isError,
+      filename,
+      storedfile,
+    };
+
+    if (isError === false) {
+      res.render("contact", {
+        ...params,
+        isSent: true,
+      });
+    } else {
+      res.render("contact", {
+        ...params,
+        isSent: false,
+        isError: true,
+      });
+    }
+  } catch (error) {
+    res.sendStatus(400);
+    throw error;
   }
-
   // res.json(req.body);
 });
 

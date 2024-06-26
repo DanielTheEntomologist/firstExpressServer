@@ -3,7 +3,9 @@
 
   {{#if isSent}}
     <div class="isSent">
-      Message sent!
+      <p>Message sent!</p>
+      <p>File uploaded: {{filename}}</p>
+      <img src="/uploads/{{storedfile}}" />
     </div>
   {{/if}}
   {{#if isError}}
@@ -12,11 +14,15 @@
     </div>
   {{/if}}
 
-  <form action="/contact/send-message" method="POST">
+  <form
+    action="/contact/send-message"
+    method="POST"
+    enctype="multipart/form-data"
+  >
 
     <label>
       Your name:
-      <input type="text" name="author" />
+      <input type="text" name="author" ></input>
     </label>
     <label>
       Your email:
@@ -25,6 +31,10 @@
     <label>
       Title:
       <input type="text" name="title" />
+    </label>
+    <label>
+      Project Design:
+      <input type="file" name="image" />
     </label>
     <label>
       Message:
