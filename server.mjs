@@ -17,7 +17,10 @@ const staticPath = path.join(__dirname, "/public");
 // const defaultViewPath = path.join(__dirname, "/views/home.hbs");
 // const error404Path = path.join(__dirname, "/views/error404.hbs");
 
+// set middleware
 app.use(express.static(staticPath));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 const viewFiles = {
   index: "index.html",
@@ -66,6 +69,30 @@ for (let key in views) {
 
 app.get("/hello/:name", (req, res) => {
   res.render("hello", { name: String(req.params.name), layout: false });
+});
+
+app.post("/contact/send-message", (req, res) => {
+  const { author, sender, title, message } = req.body;
+
+  let isSent = false;
+  let isError = !(author && sender && title && message);
+
+  const params = { author, sender, title, message, isSent, isError };
+
+  if (isError === false) {
+    res.render("contact", {
+      ...params,
+      isSent: true,
+    });
+  } else {
+    res.render("contact", {
+      ...params,
+      isSent: false,
+      isError: true,
+    });
+  }
+
+  // res.json(req.body);
 });
 
 app.use("*", (req, res) => {
