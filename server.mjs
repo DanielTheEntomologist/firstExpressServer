@@ -3,20 +3,16 @@ import express from "express";
 import { engine } from "express-handlebars";
 import path from "path";
 import multer from "multer";
-// const path = require("path");
-
-const __dirname = path.resolve();
 
 // set app and express settings
 const app = express();
 app.engine(".hbs", engine({ extname: ".hbs" }));
 app.set("view engine", ".hbs");
 app.set("views", "./views");
+
 // set paths
+const __dirname = path.resolve();
 const staticPath = path.join(__dirname, "/public");
-// const viewsPath = path.join(__dirname, "/views");
-// const defaultViewPath = path.join(__dirname, "/views/home.hbs");
-// const error404Path = path.join(__dirname, "/views/error404.hbs");
 
 // set middleware
 app.use(express.static(staticPath));
@@ -37,10 +33,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer(
-  // { dest: "./public/uploads/" }
-  { storage: storage }
-);
+const upload = multer({ storage: storage });
 
 // set views
 const views = {
@@ -116,11 +109,9 @@ app.post("/contact/send-message", upload.single("image"), (req, res) => {
     res.sendStatus(400);
     throw error;
   }
-  // res.json(req.body);
 });
 
 app.use("*", (req, res) => {
-  // res.sendFile(error404Path);
   res.status(404).render("error404");
 });
 
